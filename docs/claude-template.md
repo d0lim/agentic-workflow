@@ -11,31 +11,6 @@
 
 이 프로젝트에서 정보를 찾을 때 다음 우선순위를 따른다:
 
-```mermaid
-flowchart TD
-    NEED["🤔 정보가 필요함"] --> Q1{"프로젝트 내부 문서에<br/>있을 수 있는가?"}
-
-    Q1 -->|Yes| QMD["① qmd MCP 검색<br/><i>docs/ 디렉토리</i>"]
-    QMD --> FOUND1{"찾았는가?"}
-    FOUND1 -->|Yes| DONE["✅ 응답에 활용"]
-    FOUND1 -->|No| Q2
-
-    Q1 -->|No| Q2{"라이브러리/프레임워크<br/>API 문서가 필요한가?"}
-
-    Q2 -->|Yes| C7["② Context7 MCP<br/><i>공식 문서 조회</i>"]
-    C7 --> FOUND2{"찾았는가?"}
-    FOUND2 -->|Yes| DONE
-    FOUND2 -->|No| WEB
-
-    Q2 -->|No| WEB["③ Web Search<br/><i>최후 수단</i>"]
-    WEB --> DONE
-
-    style QMD fill:#1a4731,stroke:#34d399,stroke-width:2px,color:#e0e0e0
-    style C7 fill:#1e3a5f,stroke:#38bdf8,stroke-width:2px,color:#e0e0e0
-    style WEB fill:#5c2d0e,stroke:#f59e0b,stroke-width:2px,color:#e0e0e0
-    style DONE fill:#2d1b69,stroke:#8b5cf6,stroke-width:2px,color:#e0e0e0
-```
-
 1. **프로젝트 내부 문서 (qmd)**: 설계 결정, 과거 brainstorm, 구현 계획, 세션 로그
    - `docs/` 디렉토리가 qmd로 인덱싱되어 있다
    - 과거 의사결정이나 프로젝트 컨텍스트가 필요하면 qmd MCP로 먼저 검색한다
@@ -76,28 +51,15 @@ flowchart TD
 
 #### 레이어 구조 (Clean Architecture)
 
-```mermaid
-graph LR
-    subgraph OUTER["Outer Layer"]
-        INFRA["🔧 Infrastructure<br/><i>DB, 외부 API, 메시징<br/>프레임워크 설정</i>"]
-        INTF["🔌 Interface / Adapter<br/><i>REST/gRPC 컨트롤러<br/>이벤트 리스너, DTO 변환</i>"]
-    end
+의존성 방향: Interface/Adapter → Application → Domain
+Infrastructure는 Domain의 인터페이스를 구현한다 (의존성 역전).
 
-    subgraph INNER["Inner Layer"]
-        APP["⚙️ Application<br/><i>유스케이스, 커맨드/쿼리 핸들러<br/>포트 정의</i>"]
-        DOMAIN["💎 Domain<br/><i>엔티티, VO, 도메인 서비스<br/>도메인 이벤트, Repository 인터페이스</i>"]
-    end
+- Domain (최내부): 엔티티, VO, 도메인 서비스, 도메인 이벤트, Repository 인터페이스
+- Application: 유스케이스, 커맨드/쿼리 핸들러, 포트 정의
+- Interface/Adapter: REST/gRPC 컨트롤러, 이벤트 리스너, DTO 변환
+- Infrastructure: DB, 외부 API, 메시징, 프레임워크 설정
 
-    INTF -->|의존| APP -->|의존| DOMAIN
-    INFRA -->|구현| DOMAIN
-
-    style DOMAIN fill:#1a4731,stroke:#34d399,stroke-width:2px,color:#e0e0e0
-    style APP fill:#1e3a5f,stroke:#38bdf8,stroke-width:2px,color:#e0e0e0
-    style INTF fill:#2d1b69,stroke:#8b5cf6,stroke-width:2px,color:#e0e0e0
-    style INFRA fill:#5c2d0e,stroke:#f59e0b,stroke-width:2px,color:#e0e0e0
-```
-
-의존성 방향은 항상 바깥 → 안쪽이다. Domain은 어떤 외부 레이어도 참조하지 않는다.
+Domain은 어떤 외부 레이어도 참조하지 않는다.
 
 #### 디렉토리 구조
 
@@ -153,29 +115,13 @@ backend/
 
 #### 레이어 구조
 
-```mermaid
-graph LR
-    subgraph APP_LAYER["App Layer"]
-        APP["🚀 app/<br/><i>라우터, 프로바이더<br/>글로벌 설정</i>"]
-        PAGES["📄 pages/<br/><i>페이지 조합</i>"]
-    end
+의존성 방향: app/ → pages/ → features/ → shared/
+feature 간 직접 참조는 금지한다.
 
-    subgraph FEATURE_LAYER["Feature Layer"]
-        FEAT["🧩 features/<br/><i>도메인 기능 단위<br/>api / components / hooks<br/>stores / types</i>"]
-    end
-
-    subgraph SHARED_LAYER["Shared Layer"]
-        SHARED["🔗 shared/<br/><i>공용 컴포넌트, 훅<br/>유틸리티, 타입, 상수</i>"]
-    end
-
-    APP --> PAGES --> FEAT --> SHARED
-    FEAT -.->|"❌ feature 간<br/>직접 참조 금지"| FEAT
-
-    style SHARED fill:#1a4731,stroke:#34d399,stroke-width:2px,color:#e0e0e0
-    style FEAT fill:#1e3a5f,stroke:#38bdf8,stroke-width:2px,color:#e0e0e0
-    style PAGES fill:#2d1b69,stroke:#8b5cf6,stroke-width:2px,color:#e0e0e0
-    style APP fill:#5c2d0e,stroke:#f59e0b,stroke-width:2px,color:#e0e0e0
-```
+- app/: 라우터, 프로바이더, 글로벌 설정
+- pages/: 페이지 조합
+- features/: 도메인 기능 단위 (api, components, hooks, stores, types)
+- shared/: 공용 컴포넌트, 훅, 유틸리티, 타입, 상수
 
 #### 디렉토리 구조
 
