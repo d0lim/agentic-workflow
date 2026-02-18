@@ -75,7 +75,6 @@ graph TB
 
     subgraph EXTERNAL["🌐 외부 지식 소스"]
         direction LR
-        OLLAMA["Ollama<br/><i>로컬 임베딩/리랭킹</i>"]
         C7_API["Context7 API<br/><i>공식 문서 DB</i>"]
         WEB["Web<br/><i>블로그, 이슈 트래커</i>"]
     end
@@ -96,7 +95,6 @@ graph TB
 
     %% Retrieval → Sources
     R1 -->|"하이브리드 검색"| DOCS
-    R1 ---|"임베딩"| OLLAMA
     R2 -->|"resolve → query"| C7_API
     R3 -->|"검색"| WEB
 
@@ -107,7 +105,7 @@ graph TB
     REPO -->|"커밋"| MAIN
 
     %% Feedback Loop
-    D_SS -.->|"재인덱싱 → qmd embed"| R1
+    D_SS -.->|"재인덱싱 → qmd update && qmd embed"| R1
 ```
 
 ### 도구별 역할 요약
@@ -129,10 +127,6 @@ graph TB
 # Bun (qmd 런타임)
 curl -fsSL https://bun.sh/install | bash
 
-# Ollama (qmd 로컬 AI 모델)
-brew install ollama
-ollama serve
-
 # qmd
 bun install -g https://github.com/tobi/qmd
 
@@ -144,9 +138,9 @@ brew install entireio/tap/entire
 ### 2.2 Claude Code 플러그인 & MCP 설정
 
 ```bash
-# Superpowers 설치
-claude /plugin marketplace add obra/superpowers-marketplace
-claude /plugin install superpowers@superpowers-marketplace
+# Superpowers 설치 (Claude Code 세션 안에서 실행)
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
 ```
 
 MCP 설정 (`~/.claude/settings.json`):
@@ -166,7 +160,7 @@ MCP 설정 (`~/.claude/settings.json`):
 }
 ```
 
-> Context7 API 키가 있다면 `"args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_KEY"]`로 설정하면 rate limit이 완화된다.
+> Context7 API 키가 있다면 `"args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_KEY"]`로 설정하거나, `"env": {"CONTEXT7_API_KEY": "YOUR_KEY"}`를 추가하면 rate limit이 완화된다.
 
 ---
 
@@ -183,8 +177,8 @@ entire enable
 entire enable --strategy auto-commit
 
 # 2. qmd 인덱싱 (docs 폴더 중심)
-qmd add ./docs
-qmd add-context ./docs "프로젝트 설계 문서, brainstorm 스펙, 구현 계획, 에이전트 세션 요약"
+qmd collection add ./docs --name docs
+qmd context add qmd://docs "프로젝트 설계 문서, brainstorm 스펙, 구현 계획, 에이전트 세션 요약"
 qmd embed
 
 # 3. CLAUDE.md 생성 (아래 섹션 참고)
@@ -253,8 +247,8 @@ sequenceDiagram
     EN->>CC: 세션 요약 생성
     CC->>CC: docs/sessions/ 에 저장
 
-    DEV->>CC: qmd embed 요청
-    CC->>QMD: 새 문서 인덱싱
+    DEV->>CC: qmd update + embed 요청
+    CC->>QMD: 새 문서 인덱싱 + 임베딩
     Note over QMD: 피드백 루프 완성<br/>다음 작업 시 검색 가능
 ```
 
@@ -283,7 +277,7 @@ claude
 # → 커밋 시 체크포인트 자동 생성
 
 # 5. 작업 완료 후 인덱스 갱신
-> "qmd embed 실행해서 새 문서 인덱싱해줘"
+> "qmd update && qmd embed 실행해서 새 문서 인덱싱해줘"
 ```
 
 ### 5.2 기존 코드 수정 / 디버깅
@@ -385,13 +379,12 @@ your-project/
 
 ## 8. 체크리스트
 
-- [ ] Ollama 설치 및 실행 (`ollama serve`)
 - [ ] qmd 설치 (`bun install -g https://github.com/tobi/qmd`)
 - [ ] Entire CLI 설치 (`brew install entireio/tap/entire`)
 - [ ] Claude Code MCP 설정 (qmd + Context7)
 - [ ] Superpowers 플러그인 설치
 - [ ] 프로젝트에서 `entire enable` 실행
 - [ ] `docs/` 디렉토리 구조 생성
-- [ ] `qmd add ./docs && qmd embed` 실행
+- [ ] `qmd collection add ./docs --name docs && qmd embed` 실행
 - [ ] CLAUDE.md 작성
 - [ ] 첫 brainstorm으로 동작 확인
