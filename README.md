@@ -124,11 +124,14 @@ graph TB
 ### 2.1 기본 도구
 
 ```bash
-# Bun (qmd 런타임)
-curl -fsSL https://bun.sh/install | bash
+# qmd (npm 또는 bun 중 택 1)
+npm install -g @tobi/qmd
+# 또는
+bun install -g @tobi/qmd
 
-# qmd
-bun install -g https://github.com/tobi/qmd
+# 글로벌 설치 없이 실행도 가능
+# npx @tobi/qmd ...
+# bunx @tobi/qmd ...
 
 # Entire CLI
 brew tap entireio/tap
@@ -379,7 +382,7 @@ your-project/
 
 ## 8. 체크리스트
 
-- [ ] qmd 설치 (`bun install -g https://github.com/tobi/qmd`)
+- [ ] qmd 설치 (`npm install -g @tobi/qmd` 또는 `bun install -g @tobi/qmd`)
 - [ ] Entire CLI 설치 (`brew install entireio/tap/entire`)
 - [ ] Claude Code MCP 설정 (qmd + Context7)
 - [ ] Superpowers 플러그인 설치
