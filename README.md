@@ -141,10 +141,18 @@ brew install entireio/tap/entire
 ### 2.2 Claude Code 플러그인 & MCP 설정
 
 ```bash
-# Superpowers 설치 (Claude Code 세션 안에서 실행)
+# Claude Code 세션 안에서 실행
+
+# qmd 플러그인 설치
+claude marketplace add tobi/qmd
+claude plugin add qmd@qmd
+
+# Superpowers 설치
 /plugin marketplace add obra/superpowers-marketplace
 /plugin install superpowers@superpowers-marketplace
 ```
+
+> qmd 플러그인을 설치하면 MCP 서버 설정 없이도 qmd 검색 기능을 Claude Code에서 바로 사용할 수 있다. 플러그인과 MCP 서버 중 하나만 설정하면 된다.
 
 MCP 설정 (`~/.claude/settings.json`):
 
@@ -383,8 +391,9 @@ your-project/
 ## 8. 체크리스트
 
 - [ ] qmd 설치 (`npm install -g @tobi/qmd` 또는 `bun install -g @tobi/qmd`)
+- [ ] qmd Claude Code 플러그인 설치 (`claude marketplace add tobi/qmd && claude plugin add qmd@qmd`)
 - [ ] Entire CLI 설치 (`brew install entireio/tap/entire`)
-- [ ] Claude Code MCP 설정 (qmd + Context7)
+- [ ] Claude Code MCP 설정 (qmd + Context7) — qmd 플러그인을 설치한 경우 qmd MCP는 생략 가능
 - [ ] Superpowers 플러그인 설치
 - [ ] 프로젝트에서 `entire enable` 실행
 - [ ] `docs/` 디렉토리 구조 생성
